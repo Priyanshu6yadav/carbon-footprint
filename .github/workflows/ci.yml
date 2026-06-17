@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend — Lint, Type Check & Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: carbontrack
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: carbontrack_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://carbontrack:password@localhost:5432/carbontrack_test
+      REDIS_URL: redis://localhost:6379/0
+      JWT_SECRET: ci-test-secret-minimum-32-chars-long-placeholder
+      JWT_REFRESH_SECRET: ci-test-refresh-secret-minimum-32-chars-long-placeholder
+      ENVIRONMENT: test
+      DEBUG: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Type check with mypy
+        run: mypy app --ignore-missing-imports --no-strict-optional
+
+      - name: Run Alembic migrations
+        run: alembic upgrade head
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
+
+      - name: Security audit — pip-audit
+        run: |
+          pip install pip-audit
+          pip-audit --skip-editable || echo "::warning::pip-audit found issues"
+
+  frontend:
+    name: Frontend — Lint & Type Check
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint with ESLint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Build (verify no TS errors in production build)
+        run: npm run build
+
+      - name: Security audit — npm audit
+        run: npm audit --audit-level=high || echo "::warning::npm audit found issues"

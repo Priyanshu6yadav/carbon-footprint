@@ -1,0 +1,152 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-06",
+  "sources": [
+    "US EPA Greenhouse Gas Equivalencies Calculator 2023",
+    "DEFRA UK GHG Conversion Factors 2023",
+    "IPCC AR6 (2021) Aviation Factors",
+    "US EIA Average Electricity Emission Factor"
+  ],
+
+  "transportation": {
+    "car": {
+      "unit": "km",
+      "description": "Per km driven — averaged across petrol/diesel fleet",
+      "petrol_per_km": 0.192,
+      "diesel_per_km": 0.171,
+      "hybrid_per_km": 0.111,
+      "electric_per_km": 0.053,
+      "average_per_km": 0.171,
+      "source": "DEFRA 2023 — Average car"
+    },
+    "motorcycle": {
+      "unit": "km",
+      "per_km": 0.114,
+      "source": "DEFRA 2023 — Motorbike average"
+    },
+    "bus": {
+      "unit": "km",
+      "per_km": 0.089,
+      "source": "DEFRA 2023 — Local bus"
+    },
+    "rail": {
+      "unit": "km",
+      "per_km": 0.041,
+      "source": "DEFRA 2023 — National rail"
+    },
+    "subway_metro": {
+      "unit": "km",
+      "per_km": 0.028,
+      "source": "DEFRA 2023 — London Underground proxy"
+    },
+    "rideshare": {
+      "unit": "km",
+      "per_km": 0.142,
+      "note": "Slightly lower than solo car due to partial occupancy",
+      "source": "EPA estimate adjusted for 1.4 occupancy"
+    },
+    "flights": {
+      "unit": "km one-way per passenger",
+      "short_haul_per_km": 0.255,
+      "long_haul_per_km": 0.195,
+      "short_haul_threshold_km": 1500,
+      "radiative_forcing_multiplier": 1.9,
+      "note": "Radiative forcing multiplier applied to account for non-CO₂ high-altitude effects",
+      "source": "DEFRA 2023 + IPCC AR6 RFI"
+    }
+  },
+
+  "home_energy": {
+    "electricity": {
+      "unit": "kWh",
+      "us_average_per_kwh": 0.386,
+      "uk_average_per_kwh": 0.233,
+      "eu_average_per_kwh": 0.295,
+      "india_average_per_kwh": 0.708,
+      "default_region": "us",
+      "source": "US EIA 2023, DEFRA 2023, EEA 2022, CEA India 2023"
+    },
+    "natural_gas": {
+      "unit": "cubic metre (m³)",
+      "per_m3": 2.040,
+      "per_therm": 5.307,
+      "source": "DEFRA 2023"
+    },
+    "lpg": {
+      "unit": "litre",
+      "per_litre": 1.551,
+      "source": "DEFRA 2023 — LPG (butane/propane mix)"
+    },
+    "heating_oil": {
+      "unit": "litre",
+      "per_litre": 2.520,
+      "source": "DEFRA 2023"
+    },
+    "wood_pellets": {
+      "unit": "tonne",
+      "per_tonne": 27.0,
+      "source": "DEFRA 2023"
+    }
+  },
+
+  "food": {
+    "unit": "kg CO₂e per person per day",
+    "diet_types": {
+      "vegan": {
+        "per_day_kg": 2.89,
+        "source": "Poore & Nemecek (2018), Science — vegan diet average"
+      },
+      "vegetarian": {
+        "per_day_kg": 3.81,
+        "source": "Poore & Nemecek (2018), Science — vegetarian diet"
+      },
+      "pescatarian": {
+        "per_day_kg": 3.91,
+        "source": "Poore & Nemecek (2018)"
+      },
+      "average": {
+        "per_day_kg": 5.63,
+        "source": "Poore & Nemecek (2018), Science — average Western diet"
+      },
+      "meat_heavy": {
+        "per_day_kg": 7.19,
+        "source": "Poore & Nemecek (2018) — high meat (>100g/day)"
+      }
+    }
+  },
+
+  "shopping": {
+    "clothing": {
+      "unit": "USD spent",
+      "per_usd": 0.0119,
+      "note": "Apparel industry average including manufacturing and transport",
+      "source": "MRIO analysis, Wiedmann & Minx (2008) adapted for 2023 USD"
+    },
+    "electronics": {
+      "unit": "USD spent",
+      "per_usd": 0.0089,
+      "note": "Consumer electronics lifecycle GHG per dollar",
+      "source": "EPA Electronics Environmental Benefits Calculator 2022"
+    },
+    "general_goods": {
+      "unit": "USD spent",
+      "per_usd": 0.0071,
+      "note": "Average consumer goods, excluding food and housing",
+      "source": "EPA GHG Equivalencies 2023 — consumption-based estimate"
+    },
+    "furniture_home": {
+      "unit": "USD spent",
+      "per_usd": 0.0062,
+      "source": "DEFRA Consumer Expenditure Factor 2023"
+    }
+  },
+
+  "averages_for_comparison": {
+    "global_average_annual_kg": 4800,
+    "us_average_annual_kg": 14800,
+    "uk_average_annual_kg": 5300,
+    "eu_average_annual_kg": 8200,
+    "paris_target_annual_kg": 2000,
+    "source": "Our World in Data 2023, Climate Analytics"
+  }
+}
