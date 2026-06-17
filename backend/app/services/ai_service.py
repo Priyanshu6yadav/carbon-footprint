@@ -3,6 +3,7 @@ CarbonTrack — AI Service.
 Integrates with Groq to personalized daily challenges based on templates,
 and provides a sustainability chatbot restricted to relevant topics.
 """
+import asyncio
 import json
 import logging
 from typing import List, Dict, Any, Optional
@@ -62,11 +63,39 @@ CHALLENGE_TEMPLATES = {
 class AIService:
     def __init__(self):
         self.api_key = settings.GROQ_API_KEY
+        self.timeout_seconds = settings.GROQ_REQUEST_TIMEOUT_SECONDS
+        self.max_retries = settings.GROQ_MAX_RETRIES
+
         if self.api_key:
             self.client = AsyncGroq(api_key=self.api_key)
         else:
             self.client = None
             logger.warning("GROQ_API_KEY is not set. AIService will run in fallback mode.")
+
+    async def _execute_with_retries(self, builder_func):
+        last_exception = None
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                return await asyncio.wait_for(builder_func(), timeout=self.timeout_seconds)
+            except asyncio.TimeoutError as exc:
+                last_exception = exc
+                logger.warning(
+                    "Groq request timed out (attempt %s/%s) after %s seconds.",
+                    attempt,
+                    self.max_retries,
+                    self.timeout_seconds,
+                )
+            except Exception as exc:
+                last_exception = exc
+                logger.warning(
+                    "Groq request failed (attempt %s/%s): %s",
+                    attempt,
+                    self.max_retries,
+                    str(exc),
+                )
+                await asyncio.sleep(attempt * 0.5)
+
+        raise last_exception
 
     def get_fallback_challenges(self) -> List[Dict[str, Any]]:
         """Generates default challenges if Groq is unavailable or fails."""
@@ -148,14 +177,16 @@ class AIService:
         )
 
         try:
-            chat_completion = await self.client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                response_format={"type": "json_object"},
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.3,
+            chat_completion = await self._execute_with_retries(
+                lambda: self.client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    response_format={"type": "json_object"},
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    temperature=0.3,
+                )
             )
             response_text = chat_completion.choices[0].message.content
             parsed = json.loads(response_text)
@@ -253,11 +284,13 @@ class AIService:
         messages.append({"role": "user", "content": message})
 
         try:
-            chat_completion = await self.client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=messages,
-                temperature=0.5,
-                max_tokens=800,
+            chat_completion = await self._execute_with_retries(
+                lambda: self.client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=messages,
+                    temperature=0.5,
+                    max_tokens=800,
+                )
             )
             return chat_completion.choices[0].message.content
         except Exception as e:

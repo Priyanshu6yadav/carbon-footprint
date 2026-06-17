@@ -26,7 +26,7 @@
 git clone <repo-url>
 cd carbontrack
 cp .env.example .env
-# Edit .env and fill in JWT_SECRET, JWT_REFRESH_SECRET
+# Edit .env and fill in the required environment values.
 # Generate strong secrets: openssl rand -hex 64
 ```
 
@@ -126,4 +126,18 @@ See [`.env.example`](.env.example) for the full list. Required at startup:
 
 Optional (features degrade gracefully if missing):
 - `GROQ_API_KEY` — AI recommendations (Phase 2)
-# carbon-footprint
+
+## Render Deployment
+
+For production on Render, configure these Environment Variables instead of storing credentials in source control:
+- `DATABASE_URL`
+- `REDIS_URL`
+- `JWT_SECRET`
+- `JWT_REFRESH_SECRET`
+- `GROQ_API_KEY`
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ENVIRONMENT=production`
+
+Never commit real credentials into `.env.example` or repository files.
