@@ -1,6 +1,8 @@
 """
 CarbonTrack — FastAPI application factory.
 """
+import logging
+import logging.config
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -10,13 +12,23 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
+from sqlalchemy import text
 
 from app.config import get_settings
+from app.database import engine
 from app.middleware.security import SecurityHeadersMiddleware
 from app.redis_client import close_redis, get_redis_client
 from app.routers import auth, calculator, health, eco_score, habits, challenges, analytics, chat
 
 settings = get_settings()
+
+# ─── Structured logging ────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.DEBUG if settings.DEBUG else logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%SZ",
+)
+logger = logging.getLogger(__name__)
 
 limiter = Limiter(
     key_func=get_remote_address,
@@ -28,12 +40,21 @@ limiter = Limiter(
 async def lifespan(app: FastAPI):
     """Startup: verify connectivity. Shutdown: close connections."""
     # Verify Redis on startup
+    logger.info("Starting CarbonTrack API — verifying service connectivity…")
     redis = await get_redis_client()
     await redis.ping()
+    logger.info("Redis: OK")
 
+    # Verify database on startup
+    async with engine.connect() as conn:
+        await conn.execute(text("SELECT 1"))
+    logger.info("Database: OK")
+
+    logger.info("CarbonTrack API ready (env=%s)", settings.ENVIRONMENT)
     yield
 
     # Cleanup
+    logger.info("Shutting down CarbonTrack API…")
     await close_redis()
 
 
@@ -75,9 +96,12 @@ app.include_router(chat.router, prefix="/api/chat")
 
 @app.get("/")
 async def root():
-    return {
+    response: dict = {
         "name": settings.APP_NAME,
         "version": settings.APP_VERSION,
-        "docs": "/docs",
         "health": "/health",
     }
+    # Only expose docs link when API docs are actually enabled
+    if settings.DEBUG:
+        response["docs"] = "/docs"
+    return response

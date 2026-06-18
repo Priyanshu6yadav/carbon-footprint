@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
-import { Leaf, Car, Zap, Salad, ShoppingBag, Save, Loader2, ArrowLeft, TrendingDown } from 'lucide-react';
+import { Leaf, Car, Zap, Salad, ShoppingBag, Save, CheckCircle, Loader2, ArrowLeft, TrendingDown } from 'lucide-react';
 import { calculatorService } from '@/services/calculatorService';
 import { useAuthStore } from '@/store/authStore';
 import type { CalculationResult, CalculatorInput } from '@/types';
@@ -141,7 +141,7 @@ export default function ResultsPage() {
               {isSaving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : saved ? (
-                <Save className="w-4 h-4" />
+                <CheckCircle className="w-4 h-4" />
               ) : (
                 <Save className="w-4 h-4" />
               )}

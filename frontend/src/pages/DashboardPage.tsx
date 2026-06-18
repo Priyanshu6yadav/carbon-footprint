@@ -1,5 +1,6 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback, startTransition } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import type { AxiosError } from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ResponsiveContainer,
@@ -55,16 +56,33 @@ function formatKg(kg: number): string {
   return `${kg.toFixed(0)} kg`;
 }
 
+// ─── Hoisted sub-components ──────────────────────────────────────
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-[220px] text-center px-4">
+      <AlertCircle className="w-8 h-8 text-white/20 mb-2" />
+      <p className="text-sm text-white/40 mb-3">{message}</p>
+      <Link
+        to="/calculator"
+        id="dashboard-log-activity-btn"
+        className="text-xs px-3 py-1.5 rounded-lg border border-emerald-500/30 text-emerald-400 font-medium hover:bg-emerald-500/10 transition-colors"
+      >
+        Log Activity
+      </Link>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
   // Date range state
   const [range, setRange] = useState<'week' | 'month' | 'year' | 'custom'>('month');
-  const [startDate, setStartDate] = useState(
+  const [startDate, setStartDate] = useState<string>(() =>
     new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
-  const [endDate, setEndDate] = useState(
+  const [endDate, setEndDate] = useState<string>(() =>
     new Date().toISOString().split('T')[0]
   );
 
@@ -102,7 +120,7 @@ export default function DashboardPage() {
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch all analytics data & challenges
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -125,27 +143,26 @@ export default function DashboardPage() {
       setHabitCompletion(habits);
       setEcoScoreTrend(ecoTrend);
       setChallenges(challengeList);
-    } catch (err: any) {
-      console.error(err);
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ detail: string }>;
+      console.error('Dashboard fetch error:', axiosErr.message);
       setError('Failed to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [range, startDate, endDate]);
 
   // Trigger fetch on range change
   useEffect(() => {
     if (range !== 'custom') {
-      fetchDashboardData();
+      startTransition(() => { void fetchDashboardData(); });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [range]);
+  }, [range, fetchDashboardData]);
 
   // Initial load
   useEffect(() => {
-    fetchDashboardData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    startTransition(() => { void fetchDashboardData(); });
+  }, [fetchDashboardData]);
 
   // Scroll chat to bottom
   useEffect(() => {
@@ -188,9 +205,10 @@ export default function DashboardPage() {
       const newChallenges = await aiService.generateChallenges();
       setChallenges(newChallenges);
       setChallengeMessage({ type: 'success', text: 'Personalized challenges generated successfully!' });
-    } catch (err: any) {
-      console.error(err);
-      const detail = err.response?.data?.detail || 'Failed to generate challenges.';
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ detail: string }>;
+      console.error('Challenge generation error:', axiosErr.message);
+      const detail = axiosErr.response?.data?.detail || 'Failed to generate challenges.';
       setChallengeMessage({ type: 'error', text: detail });
     } finally {
       setGeneratingChallenges(false);
@@ -211,9 +229,11 @@ export default function DashboardPage() {
       setCompletingChallengeId(null);
       setCompletionNotes('');
       setChallengeMessage({ type: 'success', text: 'Challenge completed! XP awarded.' });
-    } catch (err: any) {
-      console.error(err);
-      alert('Failed to complete challenge.');
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ detail: string }>;
+      console.error('Challenge completion error:', axiosErr.message);
+      const detail = axiosErr.response?.data?.detail || 'Failed to complete challenge.';
+      setChallengeMessage({ type: 'error', text: detail });
     }
   };
 
@@ -232,9 +252,10 @@ export default function DashboardPage() {
       // Send chat history and current message
       const response = await aiService.chatSustainability(userMsg, chatMessages);
       setChatMessages([...newHistory, { role: 'assistant', content: response.reply }]);
-    } catch (err: any) {
-      console.error(err);
-      const errMsg = err.response?.data?.detail || 'Unable to communicate with the assistant. Please try again.';
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ detail: string }>;
+      console.error('Chat error:', axiosErr.message);
+      const errMsg = axiosErr.response?.data?.detail || 'Unable to communicate with the assistant. Please try again.';
       setChatMessages([
         ...newHistory,
         { role: 'assistant', content: `⚠️ Error: ${errMsg}` },
@@ -269,20 +290,6 @@ export default function DashboardPage() {
   const isBreakdownEmpty = totalCarbon === 0;
   const isHabitsEmpty = habitCompletion.length === 0 || habitCompletion.every((h) => h.logged_days === 0);
   const isEcoTrendEmpty = ecoScoreTrend.length === 0;
-
-  const EmptyState = ({ message }: { message: string }) => (
-    <div className="flex flex-col items-center justify-center h-[220px] text-center px-4">
-      <AlertCircle className="w-8 h-8 text-white/20 mb-2" />
-      <p className="text-sm text-white/40 mb-3">{message}</p>
-      <Link
-        to="/calculator"
-        id="dashboard-log-activity-btn"
-        className="text-xs px-3 py-1.5 rounded-lg border border-emerald-500/30 text-emerald-400 font-medium hover:bg-emerald-500/10 transition-colors"
-      >
-        Log Activity
-      </Link>
-    </div>
-  );
 
   const pieChartData = [
     { name: 'Transportation', value: categoryBreakdown.transport },
@@ -474,7 +481,7 @@ export default function DashboardPage() {
             <select
               id="dashboard-range-select"
               value={range}
-              onChange={(e) => setRange(e.target.value as any)}
+              onChange={(e) => setRange(e.target.value as 'week' | 'month' | 'year' | 'custom')}
               className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500/50 text-white cursor-pointer"
             >
               <option value="week" className="bg-[#0c130e]">Last Week</option>
@@ -727,7 +734,7 @@ export default function DashboardPage() {
                       stroke="rgba(255,255,255,0.1)"
                     />
                     <RechartsTooltip
-                      formatter={(value: any) => [`${(Number(value) * 100).toFixed(0)}%`, 'Completion Rate']}
+                      formatter={(value) => [`${(Number(value as number) * 100).toFixed(0)}%`, 'Completion Rate']}
                       contentStyle={{
                         background: 'rgba(12, 19, 14, 0.9)',
                         border: '1px solid rgba(16, 185, 129, 0.2)',
@@ -794,9 +801,11 @@ export default function DashboardPage() {
 
       {/* Floating Chat Widget Toggle */}
       <button
+        id="chatbot-toggle-btn"
         onClick={() => setIsChatOpen(!isChatOpen)}
         className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black shadow-xl hover:shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center"
         title="Chat with CarbonTrack Assistant"
+        aria-label={isChatOpen ? 'Close sustainability assistant' : 'Open sustainability assistant'}
       >
         {isChatOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
       </button>

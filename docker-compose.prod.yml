@@ -1,0 +1,53 @@
+version: "3.9"
+
+# ─── PRODUCTION overrides ─────────────────────────────────────────
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Key differences from dev:
+#   • No source-code volume mounts (uses built images)
+#   • Backend: multi-worker Uvicorn (no --reload)
+#   • Frontend: serves compiled Nginx static bundle
+#   • Secrets sourced from environment (not hardcoded)
+
+services:
+  postgres:
+    environment:
+      # Override with actual secure credentials in CI/CD or secrets manager
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD env var is required}
+    # Do NOT expose port externally in production
+    ports: !reset []
+
+  redis:
+    # Do NOT expose port externally in production
+    ports: !reset []
+
+  backend:
+    # Remove dev volume mount — use the built image
+    volumes: !reset []
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "false"
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL env var is required}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL env var is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET env var is required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET env var is required}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+    # 4 workers for concurrent handling; adjust based on CPU cores (2 * cores + 1)
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --workers 4
+      --access-log
+      --log-level info
+
+  frontend:
+    # Remove dev volume mounts — serve static build via Nginx
+    volumes: !reset []
+    environment:
+      VITE_API_URL: ${VITE_API_URL:?VITE_API_URL env var is required}
+    # Nginx serves the Vite build output
+    command: nginx -g "daemon off;"
+    ports:
+      - "80:80"
+      - "443:443"

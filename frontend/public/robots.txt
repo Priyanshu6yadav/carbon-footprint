@@ -1,0 +1,12 @@
+# CarbonTrack — robots.txt
+# Allow public pages to be indexed; block protected/private routes
+
+User-agent: *
+Allow: /
+Allow: /calculator
+Disallow: /dashboard
+Disallow: /results
+Disallow: /auth
+
+# Sitemap location (update with your actual production URL)
+Sitemap: https://carbontrack.app/sitemap.xml

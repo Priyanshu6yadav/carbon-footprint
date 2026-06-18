@@ -1,5 +1,9 @@
 version: "3.9"
 
+# NOTE: This compose file is for LOCAL DEVELOPMENT only.
+# For production, use docker-compose.prod.yml.
+# DB passwords should be sourced from environment variables or secrets management.
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -7,6 +11,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: carbontrack
+      # IMPORTANT: Change this in production — use POSTGRES_PASSWORD env var or Docker secrets
       POSTGRES_PASSWORD: password
       POSTGRES_DB: carbontrack
     ports:
@@ -52,8 +57,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    # Dev-only: mounts source code for hot-reloading
     volumes:
       - ./backend:/app
+    # NOTE: --reload is development-only; production uses docker-compose.prod.yml
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
@@ -68,6 +75,7 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+    # Dev-only: mounts source code for HMR
     volumes:
       - ./frontend:/app
       - /app/node_modules

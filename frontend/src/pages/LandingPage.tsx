@@ -269,7 +269,7 @@ export default function LandingPage() {
       {/* ── Footer ─────────────────────────────────────────────── */}
       <footer className="py-8 px-6 border-t border-white/5 text-center">
         <p className="text-white/20 text-sm">
-          © 2026 CarbonTrack · Emission factors sourced from EPA & DEFRA ·{' '}
+          © {new Date().getFullYear()} CarbonTrack · Emission factors sourced from EPA & DEFRA ·{' '}
           <Link to="/auth" className="hover:text-white/40 transition-colors">Sign in</Link>
         </p>
       </footer>
