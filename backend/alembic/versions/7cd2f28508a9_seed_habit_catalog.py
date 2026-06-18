@@ -7,6 +7,7 @@ Create Date: 2026-06-18 10:03:41.155476
 """
 from typing import Sequence, Union
 
+import uuid
 from alembic import op
 import sqlalchemy as sa
 
@@ -36,7 +37,7 @@ def upgrade() -> None:
         habits_table,
         [
             {
-                "id": sa.text("gen_random_uuid()"),
+                "id": str(uuid.uuid4()),
                 "slug": "public-transit",
                 "name": "Ride Public Transit",
                 "description": "Take the bus, metro, or train instead of driving.",
@@ -46,7 +47,7 @@ def upgrade() -> None:
                 "is_active": True,
             },
             {
-                "id": sa.text("gen_random_uuid()"),
+                "id": str(uuid.uuid4()),
                 "slug": "meatless-meals",
                 "name": "Meat-Free Day",
                 "description": "Eat vegetarian or vegan meals all day.",
@@ -56,7 +57,7 @@ def upgrade() -> None:
                 "is_active": True,
             },
             {
-                "id": sa.text("gen_random_uuid()"),
+                "id": str(uuid.uuid4()),
                 "slug": "unplug-standby",
                 "name": "Unplug Idle Devices",
                 "description": "Turn off standby power on electronics.",
@@ -66,7 +67,7 @@ def upgrade() -> None:
                 "is_active": True,
             },
             {
-                "id": sa.text("gen_random_uuid()"),
+                "id": str(uuid.uuid4()),
                 "slug": "cold-wash",
                 "name": "Cold Water Laundry",
                 "description": "Wash clothes at 30°C or cold water.",
