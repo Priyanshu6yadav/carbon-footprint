@@ -3,7 +3,6 @@ CarbonTrack — Auth router.
 Endpoints: register, login, refresh, logout, me.
 Rate-limited on login/register via SlowAPI + Redis.
 """
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from slowapi import Limiter

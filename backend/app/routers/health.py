@@ -2,7 +2,7 @@
 CarbonTrack — Health check router.
 Verifies DB and Redis connectivity.
 """
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +16,7 @@ router = APIRouter(tags=["health"])
 
 @router.get("/health")
 async def health_check(
+    response: Response,
     db: AsyncSession = Depends(get_db),
     redis: aioredis.Redis = Depends(get_redis),
 ):
@@ -39,7 +40,7 @@ async def health_check(
         redis_status = "error"
         errors.append(f"Redis: {str(e)}")
 
-    status_code = 200 if not errors else 503
+    response.status_code = 200 if not errors else 503
     return {
         "status": "ok" if not errors else "degraded",
         "db": db_status,

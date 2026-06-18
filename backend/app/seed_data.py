@@ -3,9 +3,8 @@ CarbonTrack — Database Seeding Script.
 Populates a test user, historical carbon logs, eco-scores, habits, and challenge completions.
 """
 import asyncio
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 import random
-import uuid
 
 from sqlalchemy import delete, select
 from app.database import AsyncSessionLocal

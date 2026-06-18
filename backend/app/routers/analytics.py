@@ -6,8 +6,7 @@ eco-score trends, and PDF exports. All results are cached in Redis.
 from datetime import datetime, timedelta, timezone
 import json
 from io import BytesIO
-from typing import List, Optional
-from uuid import UUID
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 import redis.asyncio as aioredis
@@ -311,8 +310,8 @@ async def export_pdf_report(
     """Generates and returns a server-side PDF sustainability report."""
     start_date, end_date, _, range_name = parse_date_range(range_type, start, end)
 
-    # 1. Gather all analytical data (using internal calls or identical queries)
-    carbon_trend = await get_carbon_trend(range_type, start, end, db, redis, current_user)
+    # 1. Gather all analytical data (carbon_trend fetched for cache-warming only)
+    _ = await get_carbon_trend(range_type, start, end, db, redis, current_user)
     breakdown = await get_category_breakdown(range_type, start, end, db, redis, current_user)
     habits = await get_habit_completion(range_type, start, end, db, redis, current_user)
     eco_trend = await get_eco_score_trend(range_type, start, end, db, redis, current_user)

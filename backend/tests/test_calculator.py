@@ -8,7 +8,6 @@ from app.schemas.calculator import (
     CalculatorInput,
     FoodInput,
     HomeEnergyInput,
-    ShoppingInput,
     TransportationInput,
 )
 from app.services.calculator_service import compute_carbon

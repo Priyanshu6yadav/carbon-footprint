@@ -6,7 +6,7 @@ and provides a sustainability chatbot restricted to relevant topics.
 import asyncio
 import json
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from groq import AsyncGroq
 
 from app.config import get_settings

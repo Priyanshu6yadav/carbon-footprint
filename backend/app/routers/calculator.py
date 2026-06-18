@@ -102,7 +102,7 @@ async def save_footprint(
         keys = await redis.keys(f"analytics:{current_user.id}:*")
         if keys:
             await redis.delete(*keys)
-    except Exception as e:
+    except Exception:
         # Don't fail the request if redis clear fails
         pass
 

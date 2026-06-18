@@ -1,7 +1,6 @@
 """
 CarbonTrack — Calculator Pydantic v2 schemas.
 """
-from typing import Optional
 from uuid import UUID
 from datetime import datetime
 
