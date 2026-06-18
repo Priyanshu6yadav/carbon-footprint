@@ -34,7 +34,10 @@ async def test_analytics_flow():
         assert len(habits) > 0
         habit_id = habits[0]["id"]
 
-        # 3. Get active challenges
+        # 3. Get active challenges (generate them first to ensure some exist)
+        gen_resp = await client.post("/api/challenges/generate", headers=headers)
+        assert gen_resp.status_code == 201
+
         challenges_resp = await client.get("/api/challenges/", headers=headers)
         assert challenges_resp.status_code == 200
         challenges = challenges_resp.json()
