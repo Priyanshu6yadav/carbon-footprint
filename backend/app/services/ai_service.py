@@ -16,7 +16,7 @@ settings = get_settings()
 
 # ─── Challenge Templates ──────────────────────────────────────────
 
-CHALLENGE_TEMPLATES = {
+CHALLENGE_TEMPLATES: Dict[str, Any] = {
     "transit-trips": {
         "slug": "transit-trips",
         "title": "Ride Public Transit",

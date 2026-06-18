@@ -6,7 +6,7 @@ eco-score trends, and PDF exports. All results are cached in Redis.
 from datetime import datetime, timedelta, timezone
 import json
 from io import BytesIO
-from typing import Optional
+from typing import Optional, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 import redis.asyncio as aioredis
@@ -77,7 +77,7 @@ async def check_cache(redis: aioredis.Redis, key: str) -> Optional[dict]:
     return None
 
 
-async def write_cache(redis: aioredis.Redis, key: str, data: any, expire: int = 300):
+async def write_cache(redis: aioredis.Redis, key: str, data: Any, expire: int = 300):
     try:
         await redis.set(key, json.dumps(data), ex=expire)
     except Exception:

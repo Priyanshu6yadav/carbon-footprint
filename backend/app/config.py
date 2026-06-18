@@ -68,4 +68,4 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """Cached settings singleton — fails fast at startup if config is invalid."""
-    return Settings()
+    return Settings()  # type: ignore[call-arg]
