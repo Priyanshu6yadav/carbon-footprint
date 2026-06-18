@@ -56,7 +56,7 @@ async def seed_db():
         print(f"Created test user with ID: {user_id}")
 
         # 3. Get standard habits (now seeded via Alembic migration)
-        habits_result = await db.execute(select(Habit).where(Habit.is_active == True))
+        habits_result = await db.execute(select(Habit).where(Habit.is_active))
         habits_list = habits_result.scalars().all()
         if not habits_list:
             print("WARNING: No habits found in the database. Did you run alembic upgrade head?")
