@@ -34,9 +34,8 @@ async def seed_db():
             await db.delete(existing_user)
             await db.commit()
 
-        # Delete any orphan challenges/habits to avoid duplicate key conflicts
+        # Delete any orphan challenges/logs to avoid duplicate key conflicts (but KEEP habits since they are catalog data)
         await db.execute(delete(Challenge))
-        await db.execute(delete(Habit))
         await db.commit()
 
         # 2. Create the test user
@@ -56,48 +55,13 @@ async def seed_db():
         user_id = test_user.id
         print(f"Created test user with ID: {user_id}")
 
-        # 3. Create standard habits
-        habits_list = [
-            Habit(
-                slug="public-transit",
-                name="Ride Public Transit",
-                description="Take the bus, metro, or train instead of driving.",
-                icon="bus",
-                co2_saved_kg_per_log=5.0,
-                xp_reward=15,
-                is_active=True,
-            ),
-            Habit(
-                slug="meatless-meals",
-                name="Meat-Free Day",
-                description="Eat vegetarian or vegan meals all day.",
-                icon="utensils",
-                co2_saved_kg_per_log=3.5,
-                xp_reward=10,
-                is_active=True,
-            ),
-            Habit(
-                slug="unplug-standby",
-                name="Unplug Idle Devices",
-                description="Turn off standby power on electronics.",
-                icon="power",
-                co2_saved_kg_per_log=1.2,
-                xp_reward=5,
-                is_active=True,
-            ),
-            Habit(
-                slug="cold-wash",
-                name="Cold Water Laundry",
-                description="Wash clothes at 30°C or cold water.",
-                icon="droplet",
-                co2_saved_kg_per_log=0.8,
-                xp_reward=8,
-                is_active=True,
-            ),
-        ]
-        db.add_all(habits_list)
-        await db.flush()
-        print("Created standard habits.")
+        # 3. Get standard habits (now seeded via Alembic migration)
+        habits_result = await db.execute(select(Habit).where(Habit.is_active == True))
+        habits_list = habits_result.scalars().all()
+        if not habits_list:
+            print("WARNING: No habits found in the database. Did you run alembic upgrade head?")
+        else:
+            print(f"Loaded {len(habits_list)} standard habits.")
 
         # 4. Create challenges
         challenges_list = [
