@@ -58,6 +58,14 @@ class Settings(BaseSettings):
                 f"Required environment variable '{info.field_name}' is missing or empty. "
                 "Check your .env file against .env.example."
             )
+        
+        # Automatically inject asyncpg driver if a raw Postgres URL is provided
+        if info.field_name == "DATABASE_URL":
+            if v.startswith("postgres://"):
+                v = v.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif v.startswith("postgresql://"):
+                v = v.replace("postgresql://", "postgresql+asyncpg://", 1)
+                
         return v
 
     @property
