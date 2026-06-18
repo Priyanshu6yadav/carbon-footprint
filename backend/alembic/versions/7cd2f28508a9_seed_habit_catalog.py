@@ -37,7 +37,7 @@ def upgrade() -> None:
         habits_table,
         [
             {
-                "id": str(uuid.uuid4()),
+                "id": uuid.UUID("c4a6b83f-f903-4e4c-851f-5060b8c6e264"),
                 "slug": "public-transit",
                 "name": "Ride Public Transit",
                 "description": "Take the bus, metro, or train instead of driving.",
@@ -47,7 +47,7 @@ def upgrade() -> None:
                 "is_active": True,
             },
             {
-                "id": str(uuid.uuid4()),
+                "id": uuid.UUID("35c4bcab-1763-4927-9be2-5e6a8e4df7df"),
                 "slug": "meatless-meals",
                 "name": "Meat-Free Day",
                 "description": "Eat vegetarian or vegan meals all day.",
@@ -57,7 +57,7 @@ def upgrade() -> None:
                 "is_active": True,
             },
             {
-                "id": str(uuid.uuid4()),
+                "id": uuid.UUID("f8f6356a-25c2-4dc5-b0d5-39bc7a1a084c"),
                 "slug": "unplug-standby",
                 "name": "Unplug Idle Devices",
                 "description": "Turn off standby power on electronics.",
@@ -67,7 +67,7 @@ def upgrade() -> None:
                 "is_active": True,
             },
             {
-                "id": str(uuid.uuid4()),
+                "id": uuid.UUID("42d6c1b3-4f9e-4e44-8e16-a192bc5c5bf8"),
                 "slug": "cold-wash",
                 "name": "Cold Water Laundry",
                 "description": "Wash clothes at 30°C or cold water.",
