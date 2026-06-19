@@ -68,7 +68,7 @@ async def generate_personalized_challenges(
     except HTTPException:
         raise
     except Exception as e:
-        logger.warning(f"Error reading Redis limit: {e}")
+        logger.warning("Error reading Redis limit: %s", e)
 
     # Gather user context: Carbon log totals in last 30 days
     thirty_days_ago = today - timedelta(days=30)
@@ -136,7 +136,7 @@ async def generate_personalized_challenges(
     try:
         await redis.set(limit_key, "1", ex=86400)
     except Exception as e:
-        logger.warning(f"Error writing Redis limit: {e}")
+        logger.warning("Error writing Redis limit: %s", e)
 
     return created_challenges
 
@@ -189,6 +189,7 @@ async def complete_challenge(
     db.add(completion)
 
     # 4. Award gamification rewards deterministically based on challenge definition
+    # XP is additive; level = floor(xp / 100) + 1 (level 1 starts at 0 XP, level 2 at 100, etc.)
     current_user.xp_total += challenge.xp_reward
     current_user.level = (current_user.xp_total // 100) + 1
 

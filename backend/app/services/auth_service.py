@@ -9,11 +9,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import bcrypt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
+from app.database import get_db
 from app.models.audit_log import AuditLog
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
@@ -188,18 +191,14 @@ async def log_audit_event(
     await db.flush()
 
 
-# ─── Current User Dependency ──────────────────────────────────────
-
-from fastapi import Depends, HTTPException, status  # noqa: E402
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer  # noqa: E402
-
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
 async def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
-    db: AsyncSession = Depends(__import__("app.database", fromlist=["get_db"]).get_db),
+    db: AsyncSession = Depends(get_db),
 ) -> User:
+    """FastAPI dependency: validate Bearer token and return the active user."""
     unauthorized = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid or expired token",

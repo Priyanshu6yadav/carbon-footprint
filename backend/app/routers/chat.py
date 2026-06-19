@@ -15,7 +15,7 @@ from app.services.auth_service import get_current_user
 from app.services.ai_service import AIService
 
 settings = get_settings()
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=get_remote_address, enabled=settings.ENVIRONMENT != "testing")
 router = APIRouter(tags=["chat"])
 ai_service = AIService()
 

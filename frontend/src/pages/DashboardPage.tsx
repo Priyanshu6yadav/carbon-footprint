@@ -603,6 +603,7 @@ export default function DashboardPage() {
               {isCarbonTrendEmpty ? (
                 <EmptyState message="No carbon logs found in this period. Use the calculator to log your footprint!" />
               ) : (
+                <div role="img" aria-label="Area chart showing total carbon emissions over time in kg CO₂e">
                 <ResponsiveContainer width="100%" height={220}>
                   <AreaChart data={carbonTrend}>
                     <defs>
@@ -640,6 +641,7 @@ export default function DashboardPage() {
                     />
                   </AreaChart>
                 </ResponsiveContainer>
+                </div>
               )}
             </div>
 
@@ -716,6 +718,7 @@ export default function DashboardPage() {
               {isHabitsEmpty ? (
                 <EmptyState message="No habits completed. Log your daily habits to see completion stats!" />
               ) : (
+                <div role="img" aria-label="Horizontal bar chart showing habit completion rates as percentages">
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={habitCompletion} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -748,6 +751,7 @@ export default function DashboardPage() {
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
+                </div>
               )}
             </div>
 
@@ -763,6 +767,7 @@ export default function DashboardPage() {
               {isEcoTrendEmpty ? (
                 <EmptyState message="No eco-score history. Keep calculating to track your eco-score trend." />
               ) : (
+                <div role="img" aria-label="Line chart showing eco-score progression over time on a scale of 0 to 100">
                 <ResponsiveContainer width="100%" height={220}>
                   <LineChart data={ecoScoreTrend}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -793,6 +798,7 @@ export default function DashboardPage() {
                     />
                   </LineChart>
                 </ResponsiveContainer>
+                </div>
               )}
             </div>
           </div>

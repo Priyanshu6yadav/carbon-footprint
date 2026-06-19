@@ -189,6 +189,7 @@ export default function ResultsPage() {
             transition={{ delay: 0.2 }}
           >
             <h2 className="font-semibold mb-4 text-white/80">Breakdown by category</h2>
+            <div role="img" aria-label="Pie chart showing carbon footprint breakdown by category: transportation, home energy, food, and shopping">
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie
@@ -212,6 +213,7 @@ export default function ResultsPage() {
                 />
               </PieChart>
             </ResponsiveContainer>
+            </div>
           </motion.div>
 
           {/* Category cards */}

@@ -16,7 +16,7 @@ from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, TokenR
 from app.services import auth_service
 
 settings = get_settings()
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=get_remote_address, enabled=settings.ENVIRONMENT != "testing")
 router = APIRouter(tags=["auth"])
 
 REFRESH_COOKIE_NAME = "refresh_token"

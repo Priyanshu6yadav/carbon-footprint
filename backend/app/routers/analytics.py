@@ -46,6 +46,8 @@ def parse_date_range(range_type: str, start_str: Optional[str], end_str: Optiona
         bucket = "month"
     elif range_type == "custom":
         try:
+            if not start_str or not end_str:
+                raise ValueError("start and end are required for custom range")
             start_date = datetime.strptime(start_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
             end_date = datetime.strptime(end_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         except Exception:

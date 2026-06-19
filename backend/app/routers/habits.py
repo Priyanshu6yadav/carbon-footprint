@@ -77,6 +77,7 @@ async def log_habit_completion(
     db.add(log)
 
     # 5. Award gamification rewards
+    # XP is additive; level = floor(xp / 100) + 1 (level 1 starts at 0 XP, level 2 at 100, etc.)
     current_user.xp_total += habit.xp_reward
     current_user.level = (current_user.xp_total // 100) + 1
 

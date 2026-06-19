@@ -241,7 +241,7 @@ class AIService:
             return generated
 
         except Exception as e:
-            logger.error(f"Error calling Groq for challenges generation: {e}", exc_info=True)
+            logger.error("Error calling Groq for challenges generation: %s", e, exc_info=True)
             return self.get_fallback_challenges()
 
     async def chat_sustainability(self, message: str, chat_history: List[Dict[str, str]]) -> str:
@@ -294,5 +294,5 @@ class AIService:
             )
             return chat_completion.choices[0].message.content
         except Exception as e:
-            logger.error(f"Error calling Groq for chatbot: {e}", exc_info=True)
+            logger.error("Error calling Groq for chatbot: %s", e, exc_info=True)
             return "I'm sorry, I encountered an issue processing your message. Please try again in a moment!"
